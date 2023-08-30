@@ -1,0 +1,9 @@
+image:
+  repository: flask-app
+  tag: latest
+
+replicaCount: 3
+
+author: ""
+namespace: flask-namespace
+appname: flask-helm

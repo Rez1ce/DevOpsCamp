@@ -1,0 +1,35 @@
+---
+- name: Configure host
+  hosts: all
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: Create user
+      ansible.builtin.user:
+        name: cloudru
+        password: "{{ 'cloudpass' | password_hash('sha512') }}"
+        createhome: yes
+        shell: /bin/bash
+
+    - name: Allow SSH authentication with key
+      authorized_key:
+        user: cloudru
+        key: "{{ lookup('file', './public_key_cloud.pub') }}"
+        state: present
+
+    - name: Disable root SSH login
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^PermitRootLogin'
+        line: 'PermitRootLogin no'
+        backup: yes
+
+    - name: Copy public key for cloudru user
+      copy:
+        src: './public_key_cloud.pub'
+        dest: '/home/cloudru/.ssh/authorized_keys'
+        owner: cloudru
+        group: cloudru
+        mode: '0600'
+...
